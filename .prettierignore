@@ -1,0 +1,29 @@
+node_modules/
+dist/
+build/
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env*
+
+# Cache directories
+.cache/
+.temp/
+.tmp/
+
+# IDE directories
+.idea/
+.vscode/
+
+# Package files
+package-lock.json
+yarn.lock
+
+# Other
+.git/
+*.min.js
+*.min.css
