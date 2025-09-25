@@ -1,13 +1,8 @@
 import { HTTP_STATUS } from '@/constants';
 import { HttpError, sendError } from '@/utils';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
-const errorMiddleware = (
-  err: Error | HttpError,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const errorMiddleware = (err: Error | HttpError, req: Request, res: Response) => {
   const statusCode = err instanceof HttpError ? err.statusCode : HTTP_STATUS.INTERNAL_ERROR;
   const message = err.message || 'Internal Server Error';
   const errors = err instanceof HttpError ? err.errors : {};

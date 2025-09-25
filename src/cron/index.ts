@@ -1,0 +1,21 @@
+import cron from 'node-cron';
+import { logger } from '@/utils/logger';
+import { scheduleReminderEmails } from './jobs/reminderEmails.job';
+
+let started = false;
+
+export function startCronJobs(): void {
+  if (started) return;
+  started = true;
+
+  // Every 5 minutes: check and send reminder emails (72h/24h windows)
+  cron.schedule('*/5 * * * *', async () => {
+    try {
+      await scheduleReminderEmails();
+    } catch (err) {
+      logger.error('Cron: reminder emails failed');
+    }
+  });
+
+  logger.info('Cron jobs scheduled');
+}

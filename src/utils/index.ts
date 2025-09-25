@@ -7,3 +7,4 @@ export * from './logger';
 export * from './pagination';
 export * from './validators';
 export * from './dbUtils';
+export * from './mailer';

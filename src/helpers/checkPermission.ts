@@ -1,5 +1,5 @@
-import { Role } from '@/models/role';
-import { User } from '@/modules/user';
+import { IRole, Role } from '@/models/role';
+import { IUser, User } from '@/modules/user';
 import { findById, findOne } from '@/utils';
 
 /**
@@ -12,14 +12,14 @@ import { findById, findOne } from '@/utils';
 export async function userHasPermission(userId: string, permissionKey: string): Promise<boolean> {
   try {
     // Step 1: Fetch user (only isSuperAdmin + roleKey fields)
-    const user = await findById(User, userId, 'isSuperAdmin roleKey', { lean: true });
+    const user = await findById<IUser>(User, userId, 'isSuperAdmin roleKey');
     if (!user) return false;
 
     // Step 2: Super Admin bypass
     if (user.isSuperAdmin) return true;
 
     // Step 3: Fetch role (only permissions field)
-    const role = await findOne(Role, { key: user.roleKey }, 'permissions', { lean: true });
+    const role = await findOne<IRole>(Role, { key: user.roleKey }, 'permissions');
     if (!role) return false;
 
     // Step 4: Check if role has this permission

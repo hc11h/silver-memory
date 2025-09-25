@@ -19,6 +19,6 @@ export const AUTH_MESSAGES: ModuleMessages = {
     PASSWORD_WEAK: 'Your password is too weak.',
   },
   INFO: {
-    VERIFY_EMAIL: 'Please verify your email address to continue.',
+    VERIFY_EMAIL: 'Verification email sent if the account exists and is unverified.',
   },
 };

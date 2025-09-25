@@ -23,3 +23,7 @@ interface VerifyEmailInput {
 interface ForgotPasswordInput {
   email: string;
 }
+
+interface ResendVerificationInput {
+  email: string;
+}

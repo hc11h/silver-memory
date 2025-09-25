@@ -5,12 +5,14 @@ import {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  resendVerification,
 } from '../controllers/auth.controller';
 import {
   loginSchema,
   registerSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  resendVerificationSchema,
 } from '../schemas/auth.schemas';
 import { validateSchema } from '@/middleware';
 
@@ -45,5 +47,11 @@ router.post('/reset-password/:token', validateSchema(resetPasswordSchema), reset
  * @auth public
  */
 router.get('/verify-email/:token', verifyEmail);
+
+/**
+ * Resend email verification
+ * @auth public
+ */
+router.post('/resend-verification', validateSchema(resendVerificationSchema), resendVerification);
 
 export default router;

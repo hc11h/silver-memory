@@ -24,3 +24,7 @@ export const resetPasswordSchema = z.object({
 export const verifyEmailSchema = z.object({
   token: trimAfter(z.string().min(1, VALIDATION_MESSAGES.REQUIRED)),
 });
+
+export const resendVerificationSchema = z.object({
+  email: trimAfter(z.string().email(VALIDATION_MESSAGES.INVALID_EMAIL)),
+});
