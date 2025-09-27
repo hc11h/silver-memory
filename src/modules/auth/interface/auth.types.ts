@@ -1,3 +1,5 @@
+import { EntityType } from '@/modules/entity';
+
 interface LoginInput {
   email: string;
   password: string;
@@ -8,6 +10,7 @@ interface SignupInput {
   password: string;
   name: string;
   roleKey?: string;
+  entityType?: EntityType;
   metadata?: Record<string, any>;
 }
 
@@ -27,3 +30,12 @@ interface ForgotPasswordInput {
 interface ResendVerificationInput {
   email: string;
 }
+
+export {
+  LoginInput,
+  SignupInput,
+  ResetPasswordInput,
+  VerifyEmailInput,
+  ForgotPasswordInput,
+  ResendVerificationInput,
+};

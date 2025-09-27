@@ -1,56 +1,56 @@
-import { subHours, isWithinInterval } from 'date-fns';
+import { addDays, addHours } from 'date-fns';
 import { sendEmail } from '@/utils';
-import { renderLayout } from '@/emails/templates/layout';
 import { logger } from '@/utils/logger';
+import { renderVerifyReminderTemplate } from '@/emails/templates/verifyReminder';
+import { renderVerifyDeletionNoticeTemplate } from '@/emails/templates/verifyDeletionNotice';
+import { IUser, User } from '@/modules/user/model/user.model';
+import env from '@/config/env';
+import { generateToken } from '@/utils/jwt';
 
 // Placeholder: replace with your actual model and query logic
-type EventLike = { id: string; title: string; startAt: Date; participants: { email: string }[] };
+type EventLike = never;
 
-async function fetchUpcomingEvents(): Promise<EventLike[]> {
-  // TODO: replace with real DB query
-  return [];
-}
-
+// Verify reminders and cleanup cron
 export async function scheduleReminderEmails(): Promise<void> {
   const now = new Date();
-  const window72hStart = subHours(now, 72);
-  const window24hStart = subHours(now, 24);
+  const users = (await User.find({
+    isEmailVerified: { $ne: true },
+    createdAt: { $exists: true },
+  })) as IUser[];
+  for (const user of users) {
+    const createdAt = user.createdAt || now;
+    const in24h = now >= addHours(createdAt, 24) && now < addHours(createdAt, 24 + 5);
+    const in72h = now >= addHours(createdAt, 72) && now < addHours(createdAt, 72 + 5);
+    const expired = now >= addDays(createdAt, 5);
 
-  const events = await fetchUpcomingEvents();
-
-  for (const event of events) {
-    const is72hWindow = isWithinInterval(event.startAt, {
-      start: now,
-      end: new Date(now.getTime() + 72 * 60 * 60 * 1000),
-    });
-    const is24hWindow = isWithinInterval(event.startAt, {
-      start: now,
-      end: new Date(now.getTime() + 24 * 60 * 60 * 1000),
-    });
-
-    const subject = is24hWindow
-      ? `Reminder: ${event.title} starts in 24 hours`
-      : is72hWindow
-        ? `Reminder: ${event.title} starts in 72 hours`
-        : '';
-    if (!subject) continue;
-
-    const html = renderLayout({
-      title: subject,
-      heading: subject,
-      body: `<p>Your event <strong>${event.title}</strong> is coming up.</p>`,
-      ctaText: 'View details',
-      ctaUrl: '#',
-    });
-
-    for (const participant of event.participants) {
+    if (expired) {
       try {
-        await sendEmail({ to: participant.email, subject, html });
+        await sendEmail({
+          to: user.email,
+          subject: 'Account removed',
+          html: renderVerifyDeletionNoticeTemplate(),
+        });
       } catch (err) {
-        logger.error(
-          `Failed to send reminder email to ${participant.email} for event ${event.title}`
-        );
+        logger.warn(`Failed to send reminder email to ${user.email}`);
       }
+      await User.deleteOne({ _id: user._id });
+      continue;
+    }
+
+    const token = generateToken({ id: user._id }, env.jwt.verifyEmailExpirationMinutes);
+    const verifyLink = `/auth/verify-email/${token}`;
+    if (in24h) {
+      await sendEmail({
+        to: user.email,
+        subject: 'Reminder: verify email',
+        html: renderVerifyReminderTemplate(verifyLink, 24),
+      });
+    } else if (in72h) {
+      await sendEmail({
+        to: user.email,
+        subject: 'Reminder: verify email',
+        html: renderVerifyReminderTemplate(verifyLink, 72),
+      });
     }
   }
 }

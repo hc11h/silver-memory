@@ -4,6 +4,7 @@ export const AUTH_MESSAGES: ModuleMessages = {
   SUCCESS: {
     REGISTER: 'User registered successfully.',
     LOGIN: 'Login successful.',
+    LOGOUT: 'Logout successful. Token invalidated.',
     PASSWORD_RESET_SENT: 'Password reset link sent.',
     PASSWORD_RESET_SUCCESS: 'Password reset successful.',
     EMAIL_VERIFIED: 'Email verified successfully.',

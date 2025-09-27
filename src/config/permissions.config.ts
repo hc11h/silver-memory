@@ -6,4 +6,5 @@ export const MODULES: Record<string, string[]> = {
   assessments: ['create', 'read', 'update', 'delete', 'approve', 'deny'],
   jobs: ['create', 'read', 'update', 'delete'],
   indexing: ['create', 'read', 'update', 'delete'],
+  audit: ['view', 'export'], // Audit logs are read-only, they can only be viewed or exported
 };

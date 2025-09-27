@@ -6,6 +6,7 @@ import {
   resetPassword,
   verifyEmail,
   resendVerification,
+  logout,
 } from '../controllers/auth.controller';
 import {
   loginSchema,
@@ -53,5 +54,11 @@ router.get('/verify-email/:token', verifyEmail);
  * @auth public
  */
 router.post('/resend-verification', validateSchema(resendVerificationSchema), resendVerification);
+
+/**
+ * Logout user - invalidate token
+ * @auth protected
+ */
+router.post('/logout', logout);
 
 export default router;

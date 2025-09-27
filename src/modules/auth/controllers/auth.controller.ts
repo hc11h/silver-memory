@@ -53,3 +53,29 @@ export const resendVerification = catchAsync(async (req: Request, res: Response)
   await AuthService.resendVerificationService({ email: req.body.email });
   sendSuccess(res, AUTH_MESSAGES.INFO.VERIFY_EMAIL, {}, HTTP_STATUS.OK, RESPONSE_TAGS.FETCHED);
 });
+
+export const logout = catchAsync(async (req: Request, res: Response): Promise<void> => {
+  // Extract token from Authorization header
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      message: 'Authorization token required',
+    });
+  }
+
+  const token = authHeader!.substring(7); // Remove 'Bearer ' prefix
+
+  // Get user ID from authenticated request (assuming auth middleware adds user to req)
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      message: 'User authentication required',
+    });
+  }
+
+  await AuthService.logoutService(token, userId);
+
+  sendSuccess(res, AUTH_MESSAGES.SUCCESS.LOGOUT, {}, HTTP_STATUS.OK, RESPONSE_TAGS.UPDATED);
+});

@@ -11,6 +11,15 @@ export const registerSchema = z.object({
   name: trimAfter(z.string().min(2, VALIDATION_MESSAGES.NAME_MIN)),
   email: trimAfter(z.string().email(VALIDATION_MESSAGES.INVALID_EMAIL)),
   password: trimAfter(z.string().min(6, VALIDATION_MESSAGES.PASSWORD_MIN)),
+  entityType: z.enum([
+    'academia',
+    'business',
+    'government',
+    'grantmaker',
+    'funder',
+    'intermediary',
+    'nonprofit',
+  ]),
 });
 
 export const forgotPasswordSchema = z.object({
