@@ -16,7 +16,7 @@ app.use(helmet());
 app.use('/api', apiLimiter);
 
 // Routes
-app.use('/api', apiRouter);
+app.use('/api/v1', apiRouter);
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.originalUrl}`);
