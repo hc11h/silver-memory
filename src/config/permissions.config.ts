@@ -1,10 +1,21 @@
-// Each module with its actions
-export const MODULES: Record<string, string[]> = {
+import { verify } from "crypto";
+
+export const MODULES = {
   users: ['create', 'read', 'update', 'delete'],
   roles: ['create', 'read', 'update', 'delete'],
-  ads: ['create', 'read', 'update', 'delete', 'publish'],
-  assessments: ['create', 'read', 'update', 'delete', 'approve', 'deny'],
-  jobs: ['create', 'read', 'update', 'delete'],
-  indexing: ['create', 'read', 'update', 'delete'],
-  audit: ['view', 'export'], // Audit logs are read-only, they can only be viewed or exported
+  verify: ['create', 'read', 'update', 'delete'],
+} as const;
+
+// Build permissions object
+export const PERMISSIONS = Object.fromEntries(
+  Object.entries(MODULES).map(([module, actions]) => [
+    module,
+    Object.fromEntries(actions.map(action => [action, `${module}_${action}`]))
+  ])
+) as {
+  [M in keyof typeof MODULES]: {
+    [A in (typeof MODULES)[M][number]]: `${M}_${A}`;
+  };
 };
+
+// Example usage: PERMISSIONS.users.create → "users_create"

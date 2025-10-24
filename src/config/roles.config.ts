@@ -1,27 +1,40 @@
-export const ROLES = [
+import { PERMISSIONS } from './permissions.config';
+
+export interface Role {
+  name: string;
+  category: 'super-admin' | 'funder' | 'grantee' | 'intermediary';
+  type?: 'admin' | 'collaborator';
+  permissions: string[];
+}
+
+export const ROLES: Role[] = [
   {
     name: 'Super Admin',
-    category: 'admin',
-    permissions: ['*'], // All permissions
+    category: 'super-admin',
+    permissions: Object.values(PERMISSIONS)
+      .flatMap(module => Object.values(module)), // full access
   },
   {
     name: 'Funder Admin',
     category: 'funder',
-    permissions: ['users_create', 'users_read', 'users_update', 'users_delete', 'ads_publish'],
-  },
-  {
-    name: 'Funder Manager',
-    category: 'funder',
-    permissions: ['users_read', 'ads_create', 'ads_update'],
-  },
-  {
-    name: 'Funder Viewer',
-    category: 'funder',
-    permissions: ['users_read', 'ads_read'],
+    type: 'admin',
+    permissions: [
+      PERMISSIONS.users.create,
+      PERMISSIONS.users.read,
+      PERMISSIONS.users.update,
+      PERMISSIONS.users.delete,
+      PERMISSIONS.verify.read,
+      PERMISSIONS.verify.update,
+      PERMISSIONS.verify.create,
+      PERMISSIONS.verify.delete,
+    ],
   },
   {
     name: 'Grantee',
     category: 'grantee',
-    permissions: ['assessments_read', 'jobs_read'],
+    type:'admin',
+    permissions: [
+      PERMISSIONS.verify.read,
+    ],
   },
 ];
