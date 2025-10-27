@@ -36,9 +36,11 @@ export class NotFoundError extends HttpError {
   }
 }
 
-export class ConflictError extends HttpError {
-  constructor(message = 'Conflict') {
-    super(HTTP_STATUS.CONFLICT, message);
+export class ConflictError extends Error {
+  statusCode: number;
+  constructor(message: string) {
+    super(message);
+    this.statusCode = HTTP_STATUS.CONFLICT; // 409
   }
 }
 

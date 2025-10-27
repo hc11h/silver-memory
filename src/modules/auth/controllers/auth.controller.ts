@@ -4,7 +4,10 @@ import { AUTH_MESSAGES, HTTP_STATUS, RESPONSE_TAGS } from '@/constants';
 import * as AuthService from '../service/auth.service';
 
 export const register = catchAsync(async (req: Request, res: Response): Promise<void> => {
+  console.log('Register API called', req.body);
+
   const user = await AuthService.registerService(req.body);
+
   sendSuccess(
     res,
     AUTH_MESSAGES.SUCCESS.REGISTER,

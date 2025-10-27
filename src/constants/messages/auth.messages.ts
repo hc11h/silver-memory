@@ -14,6 +14,7 @@ export const AUTH_MESSAGES: ModuleMessages = {
     TOKEN_EXPIRED: 'Session expired. Please login again.',
     ACCESS_DENIED: 'You do not have permission.',
     EMAIL_NOT_FOUND: 'Email not found.',
+    EMAIL_IN_USE: 'Email is already in use.',
     EMAIL_ALREADY_REGISTERED: 'Email is already registered.',
   },
   WARNING: {

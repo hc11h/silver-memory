@@ -1,9 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import apiRouter from './routes';
-
 import { apiLimiter } from '@/middleware';
-import errorMiddleware from '@/middleware/error.middleware';
+import errorMiddleware, { errorHandler } from '@/middleware/error.middleware';
 import { HttpError } from '@/utils/apis';
 import helmet from 'helmet';
 
@@ -23,16 +22,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Global Error Handler - MUST be last
-app.use(
-  (
-    err: Error | HttpError,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    errorMiddleware(err, req, res, next);
-  }
-);
+app.use(errorHandler);
+
+
 
 export default app;
