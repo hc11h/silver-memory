@@ -18,14 +18,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       return sendError(res, HTTP_STATUS.UNAUTHORIZED, 'Access denied. No token provided.');
     }
 
-    console.log('here', authHeader);
-
     const token = authHeader.split(' ')[1];
 
     const decoded = jwt.verify(token, env.jwt.secret) as JwtPayload;
 
-    // attach to req for downstream access
-    console.log('here we go', decoded);
     (req as any).user = decoded;
 
     return next();
