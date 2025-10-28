@@ -13,9 +13,15 @@ interface SignupInput {
   telephone: string;
   email: string;
   password: string;
-  entityType: 'academia' | 'business' | 'government' | 'grantmaker' | 'funder' | 'intermediary' | 'nonprofit';
+  entityType:
+    | 'academia'
+    | 'business'
+    | 'government'
+    | 'grantmaker'
+    | 'funder'
+    | 'intermediary'
+    | 'nonprofit';
 }
-
 
 interface ResetPasswordInput {
   token: string;

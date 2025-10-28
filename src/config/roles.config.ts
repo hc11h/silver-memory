@@ -11,8 +11,7 @@ export const ROLES: Role[] = [
   {
     name: 'Super Admin',
     category: 'super-admin',
-    permissions: Object.values(PERMISSIONS)
-      .flatMap(module => Object.values(module)), // full access
+    permissions: Object.values(PERMISSIONS).flatMap((module) => Object.values(module)), // full access
   },
   {
     name: 'Funder Admin',
@@ -32,9 +31,7 @@ export const ROLES: Role[] = [
   {
     name: 'Grantee',
     category: 'grantee',
-    type:'admin',
-    permissions: [
-      PERMISSIONS.verify.read,
-    ],
+    type: 'admin',
+    permissions: [PERMISSIONS.verify.read],
   },
 ];

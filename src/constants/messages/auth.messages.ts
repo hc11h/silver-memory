@@ -2,7 +2,8 @@ import { ModuleMessages } from './message.types';
 
 export const AUTH_MESSAGES: ModuleMessages = {
   SUCCESS: {
-    REGISTER: 'User registered successfully. Verification code sent to your email. Please verify within 24 hours.',
+    REGISTER:
+      'User registered successfully. Verification code sent to your email. Please verify within 24 hours.',
     LOGIN: 'Login successful.',
     LOGOUT: 'Logout successful. Token invalidated.',
     PASSWORD_RESET_SENT: 'Password reset link sent.',

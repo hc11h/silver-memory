@@ -19,11 +19,9 @@ import {
   ResetPasswordInput,
   VerifyEmailInput,
   ForgotPasswordInput,
-  ResendVerificationInput,
 } from '../interface/auth.types';
-
-import mongoose from 'mongoose';
-import { generateNumericCode } from '@/utils/generateNumericCode';
+import { registerEmail } from '@/emails/service/sendEmail';
+import { Types } from 'mongoose';
 
 export const registerService = async ({
   name,
@@ -55,17 +53,10 @@ export const registerService = async ({
     entityType,
   });
 
-   const code = generateNumericCode(6);
-
-  await sendEmail({
-    to: email,
-    subject: 'Verify your email address',
-    html: renderVerifyEmailCodeTemplate(code),
-  });
+  await registerEmail(user._id as Types.ObjectId, email);
 
   return { id: user._id, email: user.email };
 };
-
 
 export const loginService = async ({ email, password }: LoginInput) => {
   const user = await db.findOne<IUser>(User, { email });
@@ -136,8 +127,6 @@ export const checkSession = async (userId: string) => {
   };
 };
 
-
-
 export const forgotPasswordService = async ({ email }: ForgotPasswordInput) => {
   const user = await db.findOne<IUser>(User, { email });
   if (!user) throw new NotFoundError(AUTH_MESSAGES.ERROR.EMAIL_NOT_FOUND);
@@ -161,7 +150,6 @@ export const verifyEmailService = async ({ token }: VerifyEmailInput) => {
   const payload = verifyToken(token);
   await db.updateOne<IUser>(User, payload.id, { isEmailVerified: true });
 };
-
 
 export const logoutService = async (token: string, userId: string) => {
   try {

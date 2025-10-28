@@ -17,19 +17,12 @@ export const register = catchAsync(async (req: Request, res: Response): Promise<
   );
 });
 
-
-export const authCheck =catchAsync(async (req: Request, res: Response): Promise<void> =>{
- const userId = (req as any).user?.id;
+export const authCheck = catchAsync(async (req: Request, res: Response): Promise<void> => {
+  const userId = (req as any).user?.id;
   const result = await AuthService.checkSession(userId);
 
-  sendSuccess(
-    res,
-    result.message,
-    result.data,
-    HTTP_STATUS.OK,
-    RESPONSE_TAGS.FETCHED
-  );
-})
+  sendSuccess(res, result.message, result.data, HTTP_STATUS.OK, RESPONSE_TAGS.FETCHED);
+});
 
 export const login = catchAsync(async (req: Request, res: Response): Promise<void> => {
   const tokens = await AuthService.loginService(req.body);
@@ -67,7 +60,7 @@ export const verifyEmail = catchAsync(async (req: Request, res: Response): Promi
 });
 
 export const resendVerification = catchAsync(async (req: Request, res: Response): Promise<void> => {
-  await AuthService.resendVerificationService({ email: req.body.email });
+  // await AuthService.resendVerificationService({ email: req.body.email });
   sendSuccess(res, AUTH_MESSAGES.INFO.VERIFY_EMAIL, {}, HTTP_STATUS.OK, RESPONSE_TAGS.FETCHED);
 });
 

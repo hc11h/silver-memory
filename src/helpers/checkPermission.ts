@@ -19,7 +19,7 @@ export async function userHasPermission(userId: string, permissionKey: string): 
     if (user.isSuperAdmin) return true;
 
     // Step 3: Fetch role (only permissions field)
-    const role = await findOne<IRole>(Role, { key: user.roleKey }, 'permissions');
+    const role = await findOne<IRole>(Role, { key: user.entityType }, 'permissions');
     if (!role) return false;
 
     // Step 4: Check if role has this permission

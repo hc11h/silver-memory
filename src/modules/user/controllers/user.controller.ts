@@ -1,29 +1,54 @@
 import { Request, Response } from 'express';
-import * as UserService from '@/modules/user/service/user.service';
-import { sendSuccess, catchAsync } from '@/utils';
+
 import { HTTP_STATUS } from '@/constants';
+import { sendSuccess, sendError, findOne } from '@/utils';
+import { verifyEmailCode } from '../service/user.service';
+import { resendEmailAgain } from '@/emails/service/sendEmail';
+import { User } from '../model/user.model';
 
-// export const getAll = catchAsync(async (req: Request, res: Response) => {
-//   const users = await UserService.getAllUsers();
-//   sendSuccess(res, 'Users fetched', { users }, HTTP_STATUS.OK, 'fetched');
-// });
+export const verifyCode = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return sendError(res, HTTP_STATUS.UNAUTHORIZED, 'User not authenticated');
+    }
 
-// export const getById = catchAsync(async (req: Request, res: Response) => {
-//   const user = await UserService.getUserById(req.params.id);
-//   sendSuccess(res, 'User fetched', { user }, HTTP_STATUS.OK, 'fetched');
-// });
 
-// export const create = catchAsync(async (req: Request, res: Response) => {
-//   const newUser = await UserService.createUser(req.body);
-//   sendSuccess(res, 'User created', newUser, HTTP_STATUS.CREATED, 'created');
-// });
+    const { code } = req.body;
+    const result = await verifyEmailCode(userId, code);
 
-// export const update = catchAsync(async (req: Request, res: Response) => {
-//   const updatedUser = await UserService.updateUser(req.params.id, req.body);
-//   sendSuccess(res, 'User updated', updatedUser, HTTP_STATUS.OK, 'updated');
-// });
+    if (!result.success) {
+      return sendError(res, HTTP_STATUS.BAD_REQUEST, result.message);
+    }
 
-// export const remove = catchAsync(async (req: Request, res: Response) => {
-//   await UserService.deleteUser(req.params.id);
-//   sendSuccess(res, 'User deleted', {}, HTTP_STATUS.OK, 'deleted');
-// });
+    return sendSuccess(res, result.message, { verified: true }, HTTP_STATUS.OK);
+  } catch (err: any) {
+    console.error('Resend Email Error:', err);
+    return sendError(res, HTTP_STATUS.INTERNAL_ERROR, 'Something went wrong');
+  }
+};
+
+export const resendEmail = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return sendError(res, HTTP_STATUS.UNAUTHORIZED, 'User not authenticated');
+    }
+    const user = await User.findById(userId);
+
+    if(user?.isEmailVerified){
+        return sendError(res, HTTP_STATUS.FORBIDDEN, 'User is already verfired');
+    }
+
+    if (!user || !user.email) {
+      return sendError(res, HTTP_STATUS.NOT_FOUND, 'User not found or email missing');
+    }
+
+    const code = await resendEmailAgain(userId, user.email);
+
+    return sendSuccess(res, 'Verification email sent successfully', { code }, HTTP_STATUS.OK);
+  } catch (err: any) {
+    console.error('Resend Email Error:', err);
+    return sendError(res, HTTP_STATUS.INTERNAL_ERROR, 'Something went wrong');
+  }
+};

@@ -33,7 +33,7 @@ router.post('/login', validateSchema(loginSchema), login);
  */
 router.post('/register', validateSchema(registerSchema), register);
 
-router.get('/me',validateSchema(authCheckSchema),authenticate, authCheck);
+router.get('/me', authenticate, authCheck);
 
 /**
  * Send password reset link

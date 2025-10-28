@@ -4,7 +4,6 @@ import { sendError } from '@/utils';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-
 interface JwtPayload {
   id: string;
   role?: string;
@@ -26,6 +25,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     const decoded = jwt.verify(token, env.jwt.secret) as JwtPayload;
 
     // attach to req for downstream access
+    console.log('here we go', decoded);
     (req as any).user = decoded;
 
     return next();

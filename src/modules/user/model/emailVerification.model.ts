@@ -8,22 +8,21 @@ export interface IEmailVerification extends Document {
   expiresAt: Date;
   attempts: number;
   resendCount: number;
+  createdAt: Date; // ✅ added
+  updatedAt: Date; // ✅ added
 }
 
-export type VerificationType = 
-  | "email-verification" 
-  | "password-reset" 
-  | "forgot-password";
+export type VerificationType = 'email-verification' | 'password-reset' | 'forgot-password';
 
 const EmailVerificationSchema = new Schema<IEmailVerification>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     email: { type: String, required: true },
     code: { type: String, required: true },
-    type: { 
-      type: String, 
-      enum: ["email-verification", "password-reset", "forgot-password"], 
-      required: true 
+    type: {
+      type: String,
+      enum: ['email-verification', 'password-reset', 'forgot-password'],
+      required: true,
     },
     expiresAt: { type: Date, required: true },
     attempts: { type: Number, default: 0 },

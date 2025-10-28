@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import * as UserController from '../controllers/user.controller';
-import { validateSchema } from '@/middleware';
-import { createUserSchema, updateUserSchema } from '../schemas/user.schemas';
-import { authenticate } from '@/middleware/auth.middleware';
+import { resendEmail, verifyCode } from '../controllers/user.controller';
+import { authenticate } from '@/middleware';
 
 const router = Router();
 
 // Optional: use `authenticate` middleware
+
+router.get('/resend-email', authenticate, resendEmail);
+router.post('/verify-code', authenticate, verifyCode);
 
 /**
  * @route GET /api/user

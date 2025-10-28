@@ -1,5 +1,11 @@
+import nodemailer, { Transporter } from 'nodemailer';
+import { google } from 'googleapis';
 import env from '@/config/env';
-import nodemailer from 'nodemailer';
+
+const { user, clientId, clientSecret, redirectUri, refreshToken } = env.email.auth;
+
+const oAuth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
+oAuth2Client.setCredentials({ refresh_token: refreshToken });
 
 type MailOptions = {
   to: string;
@@ -7,17 +13,34 @@ type MailOptions = {
   html: string;
 };
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: env.email.auth.user,
-    pass: env.email.auth.pass,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+let transporter: Transporter | null = null;
+
+async function getTransporter(): Promise<Transporter> {
+  if (!transporter) {
+    const accessToken = await oAuth2Client.getAccessToken();
+
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user,
+        clientId,
+        clientSecret,
+        refreshToken,
+        accessToken: accessToken?.token || undefined,
+      },
+    });
+  }
+  return transporter;
+}
 
 export async function sendEmail({ to, subject, html }: MailOptions): Promise<void> {
-  await transporter.sendMail({ from: env.email.from, to, subject, html });
+  const mailTransporter = await getTransporter();
+
+  await mailTransporter.sendMail({
+    from: `"No Reply" <${user}>`,
+    to,
+    subject,
+    html,
+  });
 }

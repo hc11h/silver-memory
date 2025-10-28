@@ -50,13 +50,12 @@ export default {
     verifyEmailExpirationMinutes: env.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
   },
   email: {
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_SECURE,
     auth: {
-      user: env.SMTP_USER,
-      pass: env.SMTP_PASS,
+      user: process.env.EMAIL_USER!,
+      clientId: process.env.CLIENT_ID!,
+      clientSecret: process.env.CLIENT_SECRET!,
+      refreshToken: process.env.REFRESH_TOKEN!,
+      redirectUri: process.env.REDIRECT_URI!,
     },
-    from: env.EMAIL_FROM,
   },
 };
