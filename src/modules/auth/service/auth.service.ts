@@ -8,7 +8,7 @@ import {
 } from '@/utils';
 import env from '@/config/env';
 import { sendEmail } from '@/utils';
-import { renderVerifyEmailTemplate } from '@/emails/templates/verifyEmail';
+import { renderVerifyEmailCodeTemplate } from '@/emails/templates/verifyEmail';
 import { AUTH_MESSAGES } from '@/constants/messages';
 import { comparePassword, hashPassword } from '../utils/authUtils';
 import { renderResetPasswordTemplate } from '@/emails/templates/resetPassword';
@@ -23,6 +23,7 @@ import {
 } from '../interface/auth.types';
 
 import mongoose from 'mongoose';
+import { generateNumericCode } from '@/utils/generateNumericCode';
 
 export const registerService = async ({
   name,
@@ -54,13 +55,12 @@ export const registerService = async ({
     entityType,
   });
 
-  const token = generateToken({ id: user._id }, env.jwt.verifyEmailExpirationMinutes);
-  const verifyLink = `/auth/verify-email/${token}`;
+   const code = generateNumericCode(6);
 
   await sendEmail({
     to: email,
-    subject: 'Verify your email',
-    html: renderVerifyEmailTemplate(verifyLink),
+    subject: 'Verify your email address',
+    html: renderVerifyEmailCodeTemplate(code),
   });
 
   return { id: user._id, email: user.email };
@@ -162,21 +162,6 @@ export const verifyEmailService = async ({ token }: VerifyEmailInput) => {
   await db.updateOne<IUser>(User, payload.id, { isEmailVerified: true });
 };
 
-export const resendVerificationService = async ({ email }: ResendVerificationInput) => {
-  const user = await db.findOne<IUser>(User, { email });
-
-  if (!user) throw new NotFoundError(AUTH_MESSAGES.ERROR.EMAIL_NOT_FOUND);
-  if (user.isEmailVerified) return;
-
-  const token = generateToken({ id: user._id }, env.jwt.verifyEmailExpirationMinutes);
-  const verifyLink = `/auth/verify-email/${token}`;
-
-  await sendEmail({
-    to: email,
-    subject: 'Verify your email',
-    html: renderVerifyEmailTemplate(verifyLink),
-  });
-};
 
 export const logoutService = async (token: string, userId: string) => {
   try {
