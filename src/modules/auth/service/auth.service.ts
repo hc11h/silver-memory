@@ -21,7 +21,7 @@ import {
   ForgotPasswordInput,
   ResendVerificationInput,
 } from '../interface/auth.types';
-import { BlacklistedToken } from '@/models/blacklistedToken';
+
 import mongoose from 'mongoose';
 
 export const registerService = async ({
@@ -78,18 +78,65 @@ export const loginService = async ({ email, password }: LoginInput) => {
     { id: user._id, role: user.entityType },
     env.jwt.accessExpirationMinutes
   );
-  const refreshToken = generateToken({ id: user._id }, env.jwt.refreshExpirationDays);
 
   return {
     accessToken,
-    refreshToken,
     user: {
-      id: user._id,
+      // id: user._id,
       email: user.email,
       name: user.name,
     },
   };
 };
+
+export const checkSession = async (userId: string) => {
+  if (!userId) {
+    return {
+      message: 'Unauthorized access.',
+      data: { authenticated: false, verified: false },
+    };
+  }
+
+  const user = await db.findById<IUser>(User, userId);
+  if (!user) {
+    return {
+      message: 'User not found.',
+      data: { authenticated: false, verified: false },
+    };
+  }
+
+  if (!user.isEmailVerified) {
+    return {
+      message: 'Email not verified.',
+      data: {
+        authenticated: true,
+        verified: false,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          isEmailVerified: user.isEmailVerified,
+        },
+      },
+    };
+  }
+
+  return {
+    message: 'User authenticated.',
+    data: {
+      authenticated: true,
+      verified: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+      },
+    },
+  };
+};
+
+
 
 export const forgotPasswordService = async ({ email }: ForgotPasswordInput) => {
   const user = await db.findOne<IUser>(User, { email });
@@ -134,32 +181,9 @@ export const resendVerificationService = async ({ email }: ResendVerificationInp
 export const logoutService = async (token: string, userId: string) => {
   try {
     // Verify the token to get expiration time
-    const payload = verifyToken(token);
-
-    // Calculate token expiration time
-    const expiresAt = new Date(payload.exp * 1000);
-
-    // Add token to blacklist
-    await BlacklistedToken.create({
-      token,
-      userId: new mongoose.Types.ObjectId(userId),
-      expiresAt,
-      reason: 'logout',
-    });
-
+    verifyToken(token);
     return { success: true, message: 'Token successfully invalidated' };
   } catch (error) {
-    // Even if token verification fails, we can still blacklist it
-    // with a conservative expiration time (e.g., 1 hour from now)
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    await BlacklistedToken.create({
-      token,
-      userId: new mongoose.Types.ObjectId(userId),
-      expiresAt,
-      reason: 'invalid_token',
-    });
-
     return { success: true, message: 'Token invalidated (fallback)' };
   }
 };

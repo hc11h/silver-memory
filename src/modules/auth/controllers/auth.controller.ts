@@ -17,6 +17,20 @@ export const register = catchAsync(async (req: Request, res: Response): Promise<
   );
 });
 
+
+export const authCheck =catchAsync(async (req: Request, res: Response): Promise<void> =>{
+ const userId = (req as any).user?.id;
+  const result = await AuthService.checkSession(userId);
+
+  sendSuccess(
+    res,
+    result.message,
+    result.data,
+    HTTP_STATUS.OK,
+    RESPONSE_TAGS.FETCHED
+  );
+})
+
 export const login = catchAsync(async (req: Request, res: Response): Promise<void> => {
   const tokens = await AuthService.loginService(req.body);
   sendSuccess(res, AUTH_MESSAGES.SUCCESS.LOGIN, tokens, HTTP_STATUS.OK, RESPONSE_TAGS.FETCHED);

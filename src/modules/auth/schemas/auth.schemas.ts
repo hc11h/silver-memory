@@ -26,6 +26,7 @@ export const registerSchema = z.object({
   ]),
 });
 
+export const authCheckSchema = z.object({}).strict(); 
 
 export const forgotPasswordSchema = z.object({
   email: trimAfter(z.string().email(VALIDATION_MESSAGES.INVALID_EMAIL)),

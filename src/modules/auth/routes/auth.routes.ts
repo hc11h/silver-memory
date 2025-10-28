@@ -7,6 +7,7 @@ import {
   verifyEmail,
   resendVerification,
   logout,
+  authCheck,
 } from '../controllers/auth.controller';
 import {
   loginSchema,
@@ -14,8 +15,9 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   resendVerificationSchema,
+  authCheckSchema,
 } from '../schemas/auth.schemas';
-import { validateSchema } from '@/middleware';
+import { authenticate, validateSchema } from '@/middleware';
 
 const router = Router();
 
@@ -30,6 +32,8 @@ router.post('/login', validateSchema(loginSchema), login);
  * @auth public
  */
 router.post('/register', validateSchema(registerSchema), register);
+
+router.get('/me',validateSchema(authCheckSchema),authenticate, authCheck);
 
 /**
  * Send password reset link

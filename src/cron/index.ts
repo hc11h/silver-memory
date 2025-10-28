@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { logger } from '@/utils/logger';
 import { scheduleReminderEmails } from './jobs/reminderEmails.job';
-import { cleanupExpiredBlacklistedTokens } from './jobs/cleanupBlacklistedTokens.job';
+
 
 let started = false;
 
@@ -21,7 +21,7 @@ export function startCronJobs(): void {
   // Daily at midnight: cleanup expired blacklisted tokens
   cron.schedule('0 0 * * *', async () => {
     try {
-      await cleanupExpiredBlacklistedTokens();
+     
     } catch (err) {
       logger.error('Cron: cleanup blacklisted tokens failed');
     }
