@@ -9,6 +9,10 @@ export const loginSchema = z.object({
 
 export const registerSchema = z.object({
   name: trimAfter(z.string().min(2, VALIDATION_MESSAGES.NAME_MIN)),
+  lastname: trimAfter(z.string().min(2, 'Last name is required')),
+  entityName: trimAfter(z.string().min(2, 'Entity name is required')),
+  jobTitle: trimAfter(z.string().min(2, 'Job title is required')),
+  telephone: trimAfter(z.string().min(6, 'Telephone is required')),
   email: trimAfter(z.string().email(VALIDATION_MESSAGES.INVALID_EMAIL)),
   password: trimAfter(z.string().min(6, VALIDATION_MESSAGES.PASSWORD_MIN)),
   entityType: z.enum([
@@ -21,6 +25,7 @@ export const registerSchema = z.object({
     'nonprofit',
   ]),
 });
+
 
 export const forgotPasswordSchema = z.object({
   email: trimAfter(z.string().email(VALIDATION_MESSAGES.INVALID_EMAIL)),

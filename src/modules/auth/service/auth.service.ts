@@ -24,7 +24,16 @@ import {
 import { BlacklistedToken } from '@/models/blacklistedToken';
 import mongoose from 'mongoose';
 
-export const registerService = async ({ name, email, password, entityType }: SignupInput) => {
+export const registerService = async ({
+  name,
+  lastname,
+  entityName,
+  jobTitle,
+  telephone,
+  email,
+  password,
+  entityType,
+}: SignupInput) => {
   const existing = await db.findOne<IUser>(User, { email }, 'email');
   if (existing) throw new ConflictError(AUTH_MESSAGES.ERROR.EMAIL_IN_USE);
 
@@ -33,10 +42,21 @@ export const registerService = async ({ name, email, password, entityType }: Sig
   }
 
   const hashedPassword = await hashPassword(password);
-  const user = await User.create({ name, email, password: hashedPassword, entityType });
+
+  const user = await User.create({
+    name,
+    lastname,
+    entityName,
+    jobTitle,
+    telephone,
+    email,
+    password: hashedPassword,
+    entityType,
+  });
 
   const token = generateToken({ id: user._id }, env.jwt.verifyEmailExpirationMinutes);
   const verifyLink = `/auth/verify-email/${token}`;
+
   await sendEmail({
     to: email,
     subject: 'Verify your email',
@@ -46,6 +66,7 @@ export const registerService = async ({ name, email, password, entityType }: Sig
   return { id: user._id, email: user.email };
 };
 
+
 export const loginService = async ({ email, password }: LoginInput) => {
   const user = await db.findOne<IUser>(User, { email });
   if (!user) throw new UnauthorizedError(AUTH_MESSAGES.ERROR.INVALID_CREDENTIALS);
@@ -54,7 +75,7 @@ export const loginService = async ({ email, password }: LoginInput) => {
   if (!valid) throw new UnauthorizedError(AUTH_MESSAGES.ERROR.INVALID_CREDENTIALS);
 
   const accessToken = generateToken(
-    { id: user._id, role: user.roleKey },
+    { id: user._id, role: user.entityType },
     env.jwt.accessExpirationMinutes
   );
   const refreshToken = generateToken({ id: user._id }, env.jwt.refreshExpirationDays);

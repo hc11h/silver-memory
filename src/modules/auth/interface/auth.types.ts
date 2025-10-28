@@ -6,13 +6,16 @@ interface LoginInput {
 }
 
 interface SignupInput {
+  name: string;
+  lastname: string;
+  entityName: string;
+  jobTitle: string;
+  telephone: string;
   email: string;
   password: string;
-  name: string;
-  roleKey?: string;
-  entityType?: EntityType;
-  metadata?: Record<string, any>;
+  entityType: 'academia' | 'business' | 'government' | 'grantmaker' | 'funder' | 'intermediary' | 'nonprofit';
 }
+
 
 interface ResetPasswordInput {
   token: string;
