@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { connectDB } from './config/db';
 import { AppServer } from './config/startServer'; // updated import
-import env from '@/config/env';
+import env from './config/env';
 import app from './app';
 import { startCronJobs } from './cron';
 
