@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { connectDB } from './config/db';
-import { startServer } from './config/startServer';
+import { AppServer } from './config/startServer'; // updated import
 import env from '@/config/env';
 import app from './app';
 import { startCronJobs } from './cron';
@@ -8,7 +8,15 @@ import { startCronJobs } from './cron';
 dotenv.config();
 
 (async () => {
-  await connectDB(); // Connect to MongoDB
-  startServer(app, env.port); // Start Express server
-  startCronJobs(); // Start cron jobs
+  try {
+    await connectDB();
+
+    const server = new AppServer(app, env.port);
+    server.start();
+
+    // startCronJobs();
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
 })();
