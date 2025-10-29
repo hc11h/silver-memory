@@ -15,6 +15,12 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRATION_DAYS: z.coerce.string().default('30d'),
   JWT_RESET_PASSWORD_EXPIRATION_MINUTES: z.coerce.string().default('10m'),
   JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: z.coerce.string().default('10m'),
+  SMTP_HOST: z.string().min(1),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_SECURE: z.coerce.boolean().default(false),
+  SMTP_USER: z.string().min(1),
+  SMTP_PASS: z.string().min(1),
+  EMAIL_FROM: z.string().email(),
 });
 
 // Perform validation
@@ -42,5 +48,14 @@ export default {
     refreshExpirationDays: env.JWT_REFRESH_EXPIRATION_DAYS,
     resetPasswordExpirationMinutes: env.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     verifyEmailExpirationMinutes: env.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
+  },
+  email: {
+    auth: {
+      user: process.env.EMAIL_USER!,
+      clientId: process.env.CLIENT_ID!,
+      clientSecret: process.env.CLIENT_SECRET!,
+      refreshToken: process.env.REFRESH_TOKEN!,
+      redirectUri: process.env.REDIRECT_URI!,
+    },
   },
 };

@@ -1,49 +1,47 @@
-import { Request, Response, NextFunction } from 'express';
-import * as UserService from '@/modules/user/service/user.service';
-import { sendSuccess } from '@/utils';
+import { Request, Response } from 'express';
 import { HTTP_STATUS } from '@/constants';
+import { sendSuccess, sendError } from '@/utils';
+import { verifyEmailCode, resendVerificationEmail } from '../service/user.service';
 
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyCode = async (req: Request, res: Response) => {
   try {
-    const users = await UserService.getAllUsers();
-    sendSuccess(res, 'Users fetched', { users }, HTTP_STATUS.OK, 'fetched');
-  } catch (err) {
-    next(err);
+    const userId = (req as any).user?.id;
+    const { code } = req.body;
+
+    if (!userId) {
+      return sendError(res, HTTP_STATUS.UNAUTHORIZED, 'User not authenticated');
+    }
+
+    const result = await verifyEmailCode(userId, code);
+
+    if (!result.success) {
+      return sendError(res, HTTP_STATUS.BAD_REQUEST, result.message);
+    }
+
+    return sendSuccess(res, result.message, { verified: true }, HTTP_STATUS.OK);
+  } catch (err: any) {
+    console.error('Verify Code Error:', err);
+    return sendError(res, HTTP_STATUS.INTERNAL_ERROR, 'Something went wrong');
   }
 };
 
-export const getById = async (req: Request, res: Response, next: NextFunction) => {
+export const resendEmail = async (req: Request, res: Response) => {
   try {
-    const user = await UserService.getUserById(req.params.id);
-    sendSuccess(res, 'User fetched', { user }, HTTP_STATUS.OK, 'fetched');
-  } catch (err) {
-    next(err);
-  }
-};
+    const userId = (req as any).user?.id;
 
-export const create = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const newUser = await UserService.createUser(req.body);
-    sendSuccess(res, 'User created', newUser, HTTP_STATUS.CREATED, 'created');
-  } catch (err) {
-    next(err);
-  }
-};
+    if (!userId) {
+      return sendError(res, HTTP_STATUS.UNAUTHORIZED, 'User not authenticated');
+    }
 
-export const update = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const updatedUser = await UserService.updateUser(req.params.id, req.body);
-    sendSuccess(res, 'User updated', updatedUser, HTTP_STATUS.OK, 'updated');
-  } catch (err) {
-    next(err);
-  }
-};
+    const result = await resendVerificationEmail(userId);
 
-export const remove = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await UserService.deleteUser(req.params.id);
-    sendSuccess(res, 'User deleted', {}, HTTP_STATUS.OK, 'deleted');
-  } catch (err) {
-    next(err);
+    if (!result.success) {
+      return sendError(res, result.status || HTTP_STATUS.BAD_REQUEST, result.message);
+    }
+
+    return sendSuccess(res, result.message, HTTP_STATUS.OK);
+  } catch (err: any) {
+    console.error('Resend Email Error:', err);
+    return sendError(res, HTTP_STATUS.INTERNAL_ERROR, 'Something went wrong');
   }
 };

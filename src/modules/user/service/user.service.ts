@@ -1,22 +1,43 @@
 import { User } from '../model/user.model';
-import * as db from '@/utils/dbUtils';
+import { EmailVerification } from '../model/emailVerification.model';
+import { resendEmailAgain } from '@/emails/service/sendEmail';
+import { Types } from 'mongoose';
 
-export const getUserById = (id: string) => {
-  return db.findById(User, id, '-password', { lean: true });
+export const verifyEmailCode = async (userId: string, code: string) => {
+  const verification = await EmailVerification.findOne({
+    userId,
+    code,
+    type: 'email-verification',
+  });
+
+  if (!verification) {
+    return { success: false, message: 'Invalid or expired verification code' };
+  }
+
+  await Promise.all([
+    User.updateOne({ _id: userId }, { isEmailVerified: true }),
+    EmailVerification.deleteOne({ _id: verification._id }),
+  ]);
+
+  return { success: true, message: 'Code verified successfully' };
 };
 
-export const getAllUsers = () => {
-  return db.findAll(User, {}, '-password');
-};
+export const resendVerificationEmail = async (userId: string) => {
+  const user = await User.findById(userId);
 
-export const createUser = (data: any) => {
-  return db.createOne(User, data);
-};
+  if (!user) {
+    return { success: false, status: 404, message: 'User not found' };
+  }
 
-export const updateUser = (id: string, data: any) => {
-  return db.updateOne(User, id, data);
-};
+  if (!user.email) {
+    return { success: false, status: 404, message: 'User email is missing' };
+  }
 
-export const deleteUser = (id: string) => {
-  return db.deleteOne(User, id);
+  if (user.isEmailVerified) {
+    return { success: false, status: 403, message: 'User is already verified' };
+  }
+
+  const code = await resendEmailAgain(userId as unknown as Types.ObjectId, user.email);
+
+  return { success: true, message: 'Verification email sent successfully', code };
 };

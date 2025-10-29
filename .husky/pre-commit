@@ -10,7 +10,6 @@ fi
 
 echo "🎨 Running Format Check..."
 npm run format
-git add .
 if [ $? -ne 0 ]; then
   echo "❌ Format failed. Aborting commit."
   exit 1

@@ -26,7 +26,7 @@ async function seedRoles() {
 
     // Expand "*" into all permissions
     if (permissions.includes('*')) {
-      const allPerms = await Permission.find().lean();
+      const allPerms = (await Permission.find().lean()) as Array<{ key: string }>;
       permissions = allPerms.map((p) => p.key);
     }
 

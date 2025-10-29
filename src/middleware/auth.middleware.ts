@@ -4,15 +4,31 @@ import { sendError } from '@/utils';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) sendError(res, HTTP_STATUS.UNAUTHORIZED, 'Access Denied');
+interface JwtPayload {
+  id: string;
+  role?: string;
+  iat?: number;
+  exp?: number;
+}
 
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const decoded = jwt.verify(token as string, env.jwt.secret);
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return sendError(res, HTTP_STATUS.UNAUTHORIZED, 'Access denied. No token provided.');
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    const decoded = jwt.verify(token, env.jwt.secret) as JwtPayload;
+
     (req as any).user = decoded;
-    next();
-  } catch (err) {
-    sendError(res, HTTP_STATUS.UNAUTHORIZED, 'Invalid Token');
+
+    return next();
+  } catch (err: any) {
+    if (err.name === 'TokenExpiredError') {
+      return sendError(res, HTTP_STATUS.UNAUTHORIZED, 'Token expired. Please login again.');
+    }
+    return sendError(res, HTTP_STATUS.UNAUTHORIZED, 'Invalid token.');
   }
 };

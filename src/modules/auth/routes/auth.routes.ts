@@ -5,14 +5,19 @@ import {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  resendVerification,
+  logout,
+  authCheck,
 } from '../controllers/auth.controller';
 import {
   loginSchema,
   registerSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  resendVerificationSchema,
+  authCheckSchema,
 } from '../schemas/auth.schemas';
-import { validateSchema } from '@/middleware';
+import { authenticate, validateSchema } from '@/middleware';
 
 const router = Router();
 
@@ -27,6 +32,8 @@ router.post('/login', validateSchema(loginSchema), login);
  * @auth public
  */
 router.post('/register', validateSchema(registerSchema), register);
+
+router.get('/me', authenticate, authCheck);
 
 /**
  * Send password reset link
@@ -45,5 +52,17 @@ router.post('/reset-password/:token', validateSchema(resetPasswordSchema), reset
  * @auth public
  */
 router.get('/verify-email/:token', verifyEmail);
+
+/**
+ * Resend email verification
+ * @auth public
+ */
+router.post('/resend-verification', validateSchema(resendVerificationSchema), resendVerification);
+
+/**
+ * Logout user - invalidate token
+ * @auth protected
+ */
+router.post('/logout', logout);
 
 export default router;
