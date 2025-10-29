@@ -1,30 +1,47 @@
-import { Express } from 'express';
-import http from 'http';
+import express, { Express } from 'express';
+import http, { Server } from 'http';
 import env from '@/config/env';
 import { disconnectDB } from '@/config/db';
 
-export const startServer = (app: Express, port: number) => {
-  const server = http.createServer(app);
+export class AppServer {
+  private app: Express;
+  private port: number;
+  private server: Server | null = null;
 
-  server.listen(port, () => {
-    console.log(`🚀 Server is running at http://localhost:${port}`);
-    console.log(`🛠️  Running in ${env.env.toUpperCase()} mode`);
-  });
+  constructor(app: Express, port: number) {
+    this.app = app;
+    this.port = port;
+  }
 
-  server.on('error', (err) => {
-    console.error('❌ Server error:', err);
-    process.exit(1);
-  });
+  public start() {
+    this.server = http.createServer(this.app);
 
-  const gracefulShutdown = async () => {
+    this.server.listen(this.port, () => {
+      console.log(`🚀 Server is running at http://localhost:${this.port}`);
+      console.log(`🛠️  Running in ${env.env.toUpperCase()} mode`);
+    });
+
+    this.server.on('error', (err) => {
+      console.error('❌ Server error:', err);
+      process.exit(1);
+    });
+
+    process.on('SIGINT', () => this.gracefulShutdown());
+    process.on('SIGTERM', () => this.gracefulShutdown());
+  }
+
+  private async gracefulShutdown() {
     console.log('\n🛑 Gracefully shutting down...');
-    server.close(async () => {
-      console.log('🔒 HTTP server closed');
+
+    if (this.server) {
+      this.server.close(async () => {
+        console.log('🔒 HTTP server closed');
+        await disconnectDB();
+        process.exit(0);
+      });
+    } else {
       await disconnectDB();
       process.exit(0);
-    });
-  };
-
-  process.on('SIGINT', gracefulShutdown);
-  process.on('SIGTERM', gracefulShutdown);
-};
+    }
+  }
+}
