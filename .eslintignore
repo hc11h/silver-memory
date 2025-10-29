@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+dist/
+build/
+coverage/
+
+# Build outputs
+*.min.js
+*.min.css
+
+# Config files
+.eslintrc.js
+prettier.config.js
+jest.config.js
+babel.config.js
+setup-husky.js
+
+# Package files
+package.json
+package-lock.json
+yarn.lock
+
+# IDE files
+.vscode/
+.idea/
