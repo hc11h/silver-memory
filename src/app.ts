@@ -4,7 +4,6 @@ import apiRouter from './routes';
 import { apiLimiter } from '@/middleware';
 import errorMiddleware, { errorHandler } from '@/middleware/error.middleware';
 
-
 const app = express();
 
 app.use(
